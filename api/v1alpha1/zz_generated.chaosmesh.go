@@ -1592,6 +1592,165 @@ func (in *StressChaos) Default() {
 	gw.Default(in)
 }
 
+const KindTestWickChaos = "TestWickChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *TestWickChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *TestWickChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetObjectMeta would return the ObjectMeta for chaos
+func (in *TestWickChaos) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+// GetDuration would return the duration for chaos
+func (in *TestWickChaosSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+// GetChaos would return the a record for chaos
+func (in *TestWickChaos) GetChaos() *ChaosInstance {
+	instance := &ChaosInstance{
+		Name:      in.Name,
+		Namespace: in.Namespace,
+		Kind:      KindTestWickChaos,
+		StartTime: in.CreationTimestamp.Time,
+		Action:    "",
+		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
+	}
+
+	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+	if action.IsValid() {
+		instance.Action = action.String()
+	}
+	if in.Spec.Duration != nil {
+		instance.Duration = string(*in.Spec.Duration)
+	}
+	if in.DeletionTimestamp != nil {
+		instance.EndTime = in.DeletionTimestamp.Time
+	}
+	return instance
+}
+
+// GetStatus returns the status
+func (in *TestWickChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *TestWickChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// TestWickChaosList contains a list of TestWickChaos
+type TestWickChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []TestWickChaos `json:"items"`
+}
+
+// ListChaos returns a list of chaos
+func (in *TestWickChaosList) ListChaos() []*ChaosInstance {
+	res := make([]*ChaosInstance, 0, len(in.Items))
+	for _, item := range in.Items {
+		res = append(res, item.GetChaos())
+	}
+	return res
+}
+
+func (in *TestWickChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *TestWickChaos) IsOneShot() bool {
+	
+	if true {
+		return true
+	}
+
+	return false
+	
+}
+
+var TestWickChaosWebhookLog = logf.Log.WithName("TestWickChaos-resource")
+
+func (in *TestWickChaos) ValidateCreate() error {
+	TestWickChaosWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *TestWickChaos) ValidateUpdate(old runtime.Object) error {
+	TestWickChaosWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*TestWickChaos).Spec) {
+		return ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *TestWickChaos) ValidateDelete() error {
+	TestWickChaosWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &TestWickChaos{}
+
+func (in *TestWickChaos) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &TestWickChaos{}
+
+func (in *TestWickChaos) Default() {
+	gw.Default(in)
+}
+
 const KindTimeChaos = "TimeChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1809,6 +1968,12 @@ func init() {
 		ChaosList: &StressChaosList{},
 	})
 
+	SchemeBuilder.Register(&TestWickChaos{}, &TestWickChaosList{})
+	all.register(KindTestWickChaos, &ChaosKind{
+		Chaos:     &TestWickChaos{},
+		ChaosList: &TestWickChaosList{},
+	})
+
 	SchemeBuilder.Register(&TimeChaos{}, &TimeChaosList{})
 	all.register(KindTimeChaos, &ChaosKind{
 		Chaos:     &TimeChaos{},
@@ -1864,6 +2029,11 @@ func init() {
 	allScheduleItem.register(KindStressChaos, &ChaosKind{
 		Chaos:     &StressChaos{},
 		ChaosList: &StressChaosList{},
+	})
+
+	allScheduleItem.register(KindTestWickChaos, &ChaosKind{
+		Chaos:     &TestWickChaos{},
+		ChaosList: &TestWickChaosList{},
 	})
 
 	allScheduleItem.register(KindTimeChaos, &ChaosKind{

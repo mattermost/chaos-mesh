@@ -32,6 +32,7 @@ const (
 	TypeNetworkChaos TemplateType = "NetworkChaos"
 	TypePodChaos TemplateType = "PodChaos"
 	TypeStressChaos TemplateType = "StressChaos"
+	TypeTestWickChaos TemplateType = "TestWickChaos"
 	TypeTimeChaos TemplateType = "TimeChaos"
 
 )
@@ -48,6 +49,7 @@ var allChaosTemplateType = []TemplateType{
 	TypeNetworkChaos,
 	TypePodChaos,
 	TypeStressChaos,
+	TypeTestWickChaos,
 	TypeTimeChaos,
 
 }
@@ -73,6 +75,8 @@ type EmbedChaos struct {
 	PodChaos *PodChaosSpec `json:"podChaos,omitempty"`
 	// +optional
 	StressChaos *StressChaosSpec `json:"stressChaos,omitempty"`
+	// +optional
+	TestWickChaos *TestWickChaosSpec `json:"testwickChaos,omitempty"`
 	// +optional
 	TimeChaos *TimeChaosSpec `json:"timeChaos,omitempty"`
 
@@ -121,6 +125,10 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object,
 		result := StressChaos{}
 		result.Spec = *it.StressChaos
 		return &result, result.GetObjectMeta(), nil
+	case TypeTestWickChaos:
+		result := TestWickChaos{}
+		result.Spec = *it.TestWickChaos
+		return &result, result.GetObjectMeta(), nil
 	case TypeTimeChaos:
 		result := TimeChaos{}
 		result.Spec = *it.TimeChaos
@@ -165,6 +173,9 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 		return &result, nil
 	case TypeStressChaos:
 		result := StressChaosList{}
+		return &result, nil
+	case TypeTestWickChaos:
+		result := TestWickChaosList{}
 		return &result, nil
 	case TypeTimeChaos:
 		result := TimeChaosList{}
@@ -250,6 +261,14 @@ func (in *PodChaosList) GetItems() []GenericChaos {
 	return result
 }
 func (in *StressChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *TestWickChaosList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
 		item := item
