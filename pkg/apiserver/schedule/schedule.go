@@ -158,15 +158,16 @@ func (s *Service) createSchedule(c *gin.Context) {
 	}
 
 	parseFuncs := map[string]parseScheduleFunc{
-		v1alpha1.KindPodChaos:     parsePodChaos,
-		v1alpha1.KindNetworkChaos: parseNetworkChaos,
-		v1alpha1.KindIOChaos:      parseIOChaos,
-		v1alpha1.KindStressChaos:  parseStressChaos,
-		v1alpha1.KindTimeChaos:    parseTimeChaos,
-		v1alpha1.KindKernelChaos:  parseKernelChaos,
-		v1alpha1.KindDNSChaos:     parseDNSChaos,
-		v1alpha1.KindAWSChaos:     parseAWSChaos,
-		v1alpha1.KindGCPChaos:     parseGCPChaos,
+		v1alpha1.KindPodChaos:      parsePodChaos,
+		v1alpha1.KindNetworkChaos:  parseNetworkChaos,
+		v1alpha1.KindIOChaos:       parseIOChaos,
+		v1alpha1.KindStressChaos:   parseStressChaos,
+		v1alpha1.KindTimeChaos:     parseTimeChaos,
+		v1alpha1.KindKernelChaos:   parseKernelChaos,
+		v1alpha1.KindDNSChaos:      parseDNSChaos,
+		v1alpha1.KindAWSChaos:      parseAWSChaos,
+		v1alpha1.KindGCPChaos:      parseGCPChaos,
+		v1alpha1.KindTestWickChaos: parseTestWickChaos,
 	}
 
 	f, ok := parseFuncs[exp.Target.Kind]
@@ -185,6 +186,35 @@ func (s *Service) createSchedule(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, exp)
+}
+
+func parseTestWickChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+	chaos := &v1alpha1.TestWickChaos{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        exp.Name,
+			Namespace:   exp.Namespace,
+			Labels:      exp.Labels,
+			Annotations: exp.Annotations,
+		},
+		Spec: v1alpha1.TestWickChaosSpec{
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: exp.Scope.ParseSelector(),
+					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+					Value:    exp.Scope.Value,
+				},
+				ContainerNames: exp.Target.TestWickChaos.ContainerNames,
+			},
+		},
+	}
+
+	if exp.Duration != "" {
+		chaos.Spec.Duration = &exp.Duration
+	}
+
+	return v1alpha1.ScheduleItem{
+		EmbedChaos: v1alpha1.EmbedChaos{TestWickChaos: &chaos.Spec},
+	}
 }
 
 func parsePodChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {

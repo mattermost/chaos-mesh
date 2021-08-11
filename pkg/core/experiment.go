@@ -145,16 +145,17 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.PodSelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IOChaos KernelChaos TimeChaos StressChaos DNSChaos AWSChaos GCPChaos"`
-	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty" binding:"RequiredFieldEqual=Kind:PodChaos"`
-	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty" binding:"RequiredFieldEqual=Kind:NetworkChaos"`
-	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty" binding:"RequiredFieldEqual=Kind:IOChaos"`
-	KernelChaos  *KernelChaosInfo  `json:"kernel_chaos,omitempty" binding:"RequiredFieldEqual=Kind:KernelChaos"`
-	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty" binding:"RequiredFieldEqual=Kind:TimeChaos"`
-	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty" binding:"RequiredFieldEqual=Kind:StressChaos"`
-	DNSChaos     *DNSChaosInfo     `json:"dns_chaos,omitempty" binding:"RequiredFieldEqual=Kind:DNSChaos"`
-	AWSChaos     *AWSChaosInfo     `json:"aws_chaos,omitempty" binding:"RequiredFieldEqual=Kind:AWSChaos"`
-	GCPChaos     *GCPChaosInfo     `json:"gcp_chaos,omitempty" binding:"RequiredFieldEqual=Kind:GCPChaos"`
+	Kind          string             `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IOChaos KernelChaos TimeChaos StressChaos DNSChaos AWSChaos GCPChaos"`
+	PodChaos      *PodChaosInfo      `json:"pod_chaos,omitempty" binding:"RequiredFieldEqual=Kind:PodChaos"`
+	NetworkChaos  *NetworkChaosInfo  `json:"network_chaos,omitempty" binding:"RequiredFieldEqual=Kind:NetworkChaos"`
+	IOChaos       *IOChaosInfo       `json:"io_chaos,omitempty" binding:"RequiredFieldEqual=Kind:IOChaos"`
+	KernelChaos   *KernelChaosInfo   `json:"kernel_chaos,omitempty" binding:"RequiredFieldEqual=Kind:KernelChaos"`
+	TimeChaos     *TimeChaosInfo     `json:"time_chaos,omitempty" binding:"RequiredFieldEqual=Kind:TimeChaos"`
+	StressChaos   *StressChaosInfo   `json:"stress_chaos,omitempty" binding:"RequiredFieldEqual=Kind:StressChaos"`
+	DNSChaos      *DNSChaosInfo      `json:"dns_chaos,omitempty" binding:"RequiredFieldEqual=Kind:DNSChaos"`
+	AWSChaos      *AWSChaosInfo      `json:"aws_chaos,omitempty" binding:"RequiredFieldEqual=Kind:AWSChaos"`
+	GCPChaos      *GCPChaosInfo      `json:"gcp_chaos,omitempty" binding:"RequiredFieldEqual=Kind:GCPChaos"`
+	TestWickChaos *TestWickChaosInfo `json:"testwick_chaos,omitempty" binding:"RequiredFieldEqual=Kind:TestWickChaos"`
 }
 
 // SchedulerInfo defines the scheduler information.
@@ -234,12 +235,27 @@ type AWSChaosInfo struct {
 
 // GCPChaosInfo defines the basic information of aws chaos for creating a new GCPChaos.
 type GCPChaosInfo struct {
-	Action      string   `json:"action" binding:"oneof='node-stop' 'node-reset' 'disk-loss'"`
-	SecretName  *string  `json:"secretName,omitempty"`
-	Project     string   `json:"project"`
-	Zone        string   `json:"zone"`
-	Instance    string   `json:"instance"`
-	DeviceNames []string `json:"deviceNames,omitempty"`
+	Action      string    `json:"action" binding:"oneof='node-stop' 'node-reset' 'disk-loss'"`
+	SecretName  *string   `json:"secretName,omitempty"`
+	Project     string    `json:"project"`
+	Zone        string    `json:"zone"`
+	Instance    string    `json:"instance"`
+	DeviceNames *[]string `json:"deviceNames,omitempty"`
+}
+
+// TestWickChaosInfo defines the basic information of testwick chaos for creating a new TestWickChaos.
+type TestWickChaosInfo struct {
+	ProvisionerURL  string   `json:"provisioner_url"`
+	HostedZone      string   `json:"hosted_zone,omitempty"`
+	Samples         string   `json:"samples,omitempty"`
+	ChannelSamples  string   `json:"channel_samples,omitempty"`
+	ChannelMessages string   `json:"channel_messages,omitempty"`
+	Owner           string   `json:"owner,omitempty"`
+	Size            string   `json:"size,omitempty"`
+	AffinityType    string   `json:"affinity_type,omitempty"`
+	DBType          string   `json:"db_type,omitempty"`
+	FileStore       string   `json:"file_store,omitempty"`
+	ContainerNames  []string `json:"container_names,omitempty"`
 }
 
 // ParsePodChaos Parse PodChaos JSON string into KubeObjectDesc.
@@ -421,6 +437,28 @@ func (e *Experiment) ParseAWSChaos() (KubeObjectDesc, error) {
 // ParseGCPChaos Parse GCPChaos JSON string into KubeObjectDesc.
 func (e *Experiment) ParseGCPChaos() (KubeObjectDesc, error) {
 	chaos := &v1alpha1.GCPChaos{}
+	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
+		return KubeObjectDesc{}, err
+	}
+
+	return KubeObjectDesc{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+		},
+		Meta: KubeObjectMeta{
+			Name:        chaos.Name,
+			Namespace:   chaos.Namespace,
+			Labels:      chaos.Labels,
+			Annotations: chaos.Annotations,
+		},
+		Spec: chaos.Spec,
+	}, nil
+}
+
+// ParseTestWickChaos Parse TestWickChaos JSON string into KubeObjectDesc.
+func (e *Experiment) ParseTestWickChaos() (KubeObjectDesc, error) {
+	chaos := &v1alpha1.TestWickChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
 		return KubeObjectDesc{}, err
 	}

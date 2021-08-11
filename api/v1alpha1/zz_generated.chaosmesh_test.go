@@ -761,6 +761,80 @@ func TestStressChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
+func TestTestWickChaosIsDeleted(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &TestWickChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsDeleted()
+}
+
+func TestTestWickChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &TestWickChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsPaused()
+}
+
+func TestTestWickChaosGetDuration(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &TestWickChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.Spec.GetDuration()
+}
+
+func TestTestWickChaosGetChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &TestWickChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetChaos()
+}
+
+func TestTestWickChaosGetStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &TestWickChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetStatus()
+}
+
+func TestTestWickChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &TestWickChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
+func TestTestWickChaosListChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &TestWickChaosList{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.ListChaos()
+}
+
 func TestTimeChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 
