@@ -48,7 +48,7 @@ type TestWickChaosStatus struct {
 type TestWick struct {
 	ProvisionerURL  *string `json:"provisionerURL,omitempty"`
 	HostedZone      *string `json:"hostedZone,omitempty"`
-	Samples         *int    `json:"samples,omitempty"`
+	Samples         *string `json:"samples,omitempty"`
 	ChannelSamples  *string `json:"channelSamples,omitempty"`
 	ChannelMessages *string `json:"channelMessages,omitempty"`
 	Owner           *string `json:"owner,omitempty"`

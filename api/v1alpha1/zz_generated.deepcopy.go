@@ -2875,7 +2875,7 @@ func (in *TestWick) DeepCopyInto(out *TestWick) {
 	}
 	if in.Samples != nil {
 		in, out := &in.Samples, &out.Samples
-		*out = new(int)
+		*out = new(string)
 		**out = **in
 	}
 	if in.ChannelSamples != nil {

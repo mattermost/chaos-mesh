@@ -12877,7 +12877,7 @@ spec:
               provisionerURL:
                 type: string
               samples:
-                type: integer
+                type: string
               size:
                 type: string
             type: object
