@@ -346,6 +346,21 @@ const Time = ({ data }: any) => (
   </>
 )
 
+const TestWick = ({ data }: any) => (
+  <>
+    {data.provisionerURL && (
+      <TableRow>
+        <TableCell>Provisioner URL</TableCell>
+        <TableCell>
+          <Typography variant="body2" color="textSecondary">
+            {data.provisionerURL}
+          </Typography>
+        </TableCell>
+      </TableRow>
+    )}
+  </>
+)
+
 export const Experiment = ({ kind, data }: { kind: ExperimentKind; data: any }) => (
   <Table size="small">
     <TableBody>
@@ -372,6 +387,7 @@ export const Experiment = ({ kind, data }: { kind: ExperimentKind; data: any }) 
       {kind === 'IOChaos' && <IO data={data} />}
       {kind === 'StressChaos' && <Stress data={data} />}
       {kind === 'TimeChaos' && <Time data={data} />}
+      {kind === 'TestWickChaos' && <TestWick data={data} />}
     </TableBody>
   </Table>
 )

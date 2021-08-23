@@ -6,20 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.0
   creationTimestamp: null
-  name: jvmchaos.chaos-mesh.org
+  name: testwickchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
   names:
-    kind: JVMChaos
-    listKind: JVMChaosList
-    plural: jvmchaos
-    singular: jvmchaos
+    kind: TestWickChaos
+    listKind: TestWickChaosList
+    plural: testwickchaos
+    singular: testwickchaos
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: JVMChaos is the Schema for the jvmchaos API
+        description: TestWickChaos is the Schema for the TestWickChaos API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,23 +34,9 @@ spec:
           metadata:
             type: object
           spec:
-            description: JVMChaosSpec defines the desired state of JVMChaos
+            description: TestWickChaosSpec is the content of the specification for
+              a TestWickChaos
             properties:
-              action:
-                description: 'Action defines the specific jvm chaos action. Supported
-                  action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
-                enum:
-                - delay
-                - return
-                - script
-                - cfl
-                - oom
-                - ccf
-                - tce
-                - cpf
-                - tde
-                - tpf
-                type: string
               containerNames:
                 description: ContainerNames indicates list of the name of affected
                   container. If not set, all containers will be injected
@@ -60,16 +46,6 @@ spec:
               duration:
                 description: Duration represents the duration of the chaos action
                 type: string
-              flags:
-                additionalProperties:
-                  type: string
-                description: Flags represents the flags of action
-                type: object
-              matchers:
-                additionalProperties:
-                  type: string
-                description: Matchers represents the matching rules for the target
-                type: object
               mode:
                 description: 'Mode defines the mode to run chaos action. Supported
                   mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -170,24 +146,6 @@ spec:
                       belong, and the each values is a set of pod names.
                     type: object
                 type: object
-              target:
-                description: 'Target defines the specific jvm chaos target. Supported
-                  target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                enum:
-                - servlet
-                - psql
-                - jvm
-                - jedis
-                - http
-                - dubbo
-                - rocketmq
-                - tars
-                - mysql
-                - druid
-                - redisson
-                - rabbitmq
-                - mongodb
-                type: string
               value:
                 description: Value is required when the mode is set to `FixedPodMode`
                   / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -197,13 +155,11 @@ spec:
                   from 0-100 to specify the max percent of pods to do chaos action
                 type: string
             required:
-            - action
             - mode
             - selector
-            - target
             type: object
           status:
-            description: JVMChaosStatus defines the observed state of JVMChaos
+            description: TestWickChaosStatus represents the status of a TestWickChaos
             properties:
               conditions:
                 description: Conditions represents the current global condition of
@@ -248,6 +204,29 @@ spec:
                 type: object
             required:
             - experiment
+            type: object
+          testWick:
+            properties:
+              affinityType:
+                type: string
+              channelMessages:
+                type: string
+              channelSamples:
+                type: string
+              dbType:
+                type: string
+              fileStore:
+                type: string
+              hostedZone:
+                type: string
+              owner:
+                type: string
+              provisionerURL:
+                type: string
+              samples:
+                type: string
+              size:
+                type: string
             type: object
         type: object
     served: true
