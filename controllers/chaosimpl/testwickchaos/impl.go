@@ -1,9 +1,12 @@
 package testwickchaos
 
 import (
+	"bufio"
 	"bytes"
 	"context"
+	"io"
 	"os/exec"
+	"sync"
 
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
@@ -42,16 +45,49 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	cmd := exec.Command("/usr/local/bin/testwick", arguments...)
 	impl.Log.Info("This is the command running", "command", cmd.String())
 
-	var out bytes.Buffer
-	var stdout bytes.Buffer
-	cmd.Stderr = &out
-	cmd.Stdout = &stdout
-	err := cmd.Run()
+	stdout := new(bytes.Buffer)
+	stderr := new(bytes.Buffer)
+	rStdout, wStdout := io.Pipe()
+	rStderr, wStderr := io.Pipe()
+
+	cmd.Stdout = wStdout
+	cmd.Stderr = wStderr
+
+	var wg sync.WaitGroup
+
+	// Log and buffer stdout.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := bufferAndLog(rStdout, stdout, impl.Log); err != nil {
+			impl.Log.Error(err, "failed to scan stdout")
+		}
+	}()
+
+	// Log and buffer stderr.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := bufferAndLog(rStderr, stderr, impl.Log); err != nil {
+			impl.Log.Error(err, "failed to scan stderr")
+		}
+	}()
+
+	var err error
+	go func() {
+		err = cmd.Run()
+		wStdout.Close()
+		wStderr.Close()
+	}()
+
+	wg.Wait()
+
 	if err != nil {
-		impl.Log.Error(err, "testwick installation creation failed")
+		impl.Log.Error(err, "failed invocation")
+
 		return v1alpha1.NotInjected, err
 	}
-	impl.Log.Info(stdout.String())
+
 	return v1alpha1.Injected, nil
 }
 
@@ -80,3 +116,15 @@ var Module = fx.Provide(
 		Target: NewImpl,
 	},
 )
+
+func bufferAndLog(reader io.Reader, buffer *bytes.Buffer, logger logr.Logger) error {
+	scanner := bufio.NewScanner(io.TeeReader(reader, buffer))
+	for scanner.Scan() {
+		logger.Info(scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
