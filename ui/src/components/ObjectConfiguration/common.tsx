@@ -361,7 +361,6 @@ const TestWick = ({ data }: any) => (
   </>
 )
 
-
 export const Experiment = ({ kind, data }: { kind: ExperimentKind; data: any }) => (
   <Table size="small">
     <TableBody>

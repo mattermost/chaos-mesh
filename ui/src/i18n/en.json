@@ -202,7 +202,7 @@
     "event": {
       "uuid": "UUID",
       "namespace": "Namespace",
-      "name": "名称",
+      "name": "name",
       "kind": "Kind",
       "started": "Started",
       "message": "Message"
