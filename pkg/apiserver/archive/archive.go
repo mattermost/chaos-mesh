@@ -208,6 +208,8 @@ func (s *Service) detail(c *gin.Context) {
 		kubeObject, err = exp.ParseAWSChaos()
 	case v1alpha1.KindGCPChaos:
 		kubeObject, err = exp.ParseGCPChaos()
+	case v1alpha1.KindTestWickChaos:
+		kubeObject, err = exp.ParseTestWickChaos()
 	default:
 		err = fmt.Errorf("kind %s is not support", exp.Kind)
 	}

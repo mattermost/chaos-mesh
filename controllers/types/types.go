@@ -114,4 +114,12 @@ var ChaosObjects = fx.Supply(
 			Object: &v1alpha1.GCPChaos{},
 		},
 	},
+
+	fx.Annotated{
+		Group: "objs",
+		Target: Object{
+			Name:   "testwickchaos",
+			Object: &v1alpha1.TestWickChaos{},
+		},
+	},
 )
