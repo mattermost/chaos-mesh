@@ -112,19 +112,6 @@ export interface ExperimentTargetStress {
   container_name: string
 }
 
-export interface ExperimentTargetTestWick {
-  provisioner_url: string
-  hosted_zone: string
-  samples: string
-  channel_samples: string
-  channel_messages: string
-  owner: string
-  size: string
-  affinity_type: string
-  db_type: string
-  file_store: string
-}
-
 export type ExperimentKind =
   | 'PodChaos'
   | 'NetworkChaos'
@@ -135,7 +122,6 @@ export type ExperimentKind =
   | 'DNSChaos'
   | 'AWSChaos'
   | 'GCPChaos'
-  | 'TestWickChaos'
 
 export interface ExperimentTarget {
   kind: ExperimentKind
@@ -145,7 +131,6 @@ export interface ExperimentTarget {
   kernel_chaos: ExperimentTargetKernel
   time_chaos: ExperimentTargetTime
   stress_chaos: ExperimentTargetStress
-  testwick_chaos: ExperimentTargetTestWick
 }
 
 export interface ExperimentSchedule {

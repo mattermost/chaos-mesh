@@ -17,60 +17,113 @@ import (
 	"fmt"
 	"reflect"
 
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
-type EbsVolume string
-type AWSDeviceName string
+// log is for logging in this package.
+var awschaoslog = logf.Log.WithName("awschaos-resource")
 
-func (in *EbsVolume) Validate(root interface{}, path *field.Path) field.ErrorList {
-	allErrs := field.ErrorList{}
+// updating spec of a chaos will have no effect, we'd better reject it
+var ErrCanNotUpdateChaos = fmt.Errorf("Cannot update chaos spec")
 
-	awsChaos := root.(*AWSChaos)
-	if awsChaos.Spec.Action == DetachVolume {
-		if in == nil {
-			err := fmt.Errorf("the ID of EBS volume should not be empty on %s action", awsChaos.Spec.Action)
-			allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
-		}
+// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-awschaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=awschaos,verbs=create;update,versions=v1alpha1,name=mawschaos.kb.io
+
+var _ webhook.Defaulter = &AWSChaos{}
+
+// Default implements webhook.Defaulter so a webhook will be registered for the type
+func (in *AWSChaos) Default() {
+	awschaoslog.Info("default", "name", in.Name)
+	in.Spec.Default()
+}
+
+func (in *AWSChaosSpec) Default() {}
+
+// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-awschaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=awschaos,versions=v1alpha1,name=vawschaos.kb.io
+
+var _ webhook.Validator = &AWSChaos{}
+
+// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
+func (in *AWSChaos) ValidateCreate() error {
+	awschaoslog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *AWSChaos) ValidateUpdate(old runtime.Object) error {
+	awschaoslog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*AWSChaos).Spec) {
+		return ErrCanNotUpdateChaos
 	}
+	return in.Validate()
+}
 
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *AWSChaos) ValidateDelete() error {
+	awschaoslog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+// Validate validates chaos object
+func (in *AWSChaos) Validate() error {
+	allErrs := in.Spec.Validate()
+
+	if len(allErrs) > 0 {
+		return fmt.Errorf(allErrs.ToAggregate().Error())
+	}
+	return nil
+}
+
+func (in *AWSChaosSpec) Validate() field.ErrorList {
+	specField := field.NewPath("spec")
+	allErrs := in.validateEbsVolume(specField.Child("volumeID"))
+	allErrs = append(allErrs, in.validateAction(specField)...)
+	allErrs = append(allErrs, validateDuration(in, specField)...)
+	allErrs = append(allErrs, in.validateDeviceName(specField.Child("deviceName"))...)
 	return allErrs
 }
 
-func (in *AWSDeviceName) Validate(root interface{}, path *field.Path) field.ErrorList {
+// validateEbsVolume validates the EbsVolume
+func (in *AWSChaosSpec) validateEbsVolume(containerField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-
-	awsChaos := root.(*AWSChaos)
-	if awsChaos.Spec.Action == DetachVolume {
-		if in == nil {
-			err := fmt.Errorf("the name of device should not be empty on %s action", awsChaos.Spec.Action)
-			allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
+	if in.Action == DetachVolume {
+		if in.EbsVolume == nil {
+			err := fmt.Errorf("the ID of EBS volume should not be empty on %s action", in.Action)
+			allErrs = append(allErrs, field.Invalid(containerField, in.EbsVolume, err.Error()))
 		}
 	}
+	return allErrs
+}
 
+// validateDeviceName validates the DeviceName
+func (in *AWSChaosSpec) validateDeviceName(containerField *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if in.Action == DetachVolume {
+		if in.DeviceName == nil {
+			err := fmt.Errorf("the name of device should not be empty on %s action", in.Action)
+			allErrs = append(allErrs, field.Invalid(containerField, in.DeviceName, err.Error()))
+		}
+	}
 	return allErrs
 }
 
 // ValidateScheduler validates the scheduler and duration
-func (in *AWSChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *AWSChaosSpec) validateAction(spec *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	// in cannot be nil
-	switch *in {
+	switch in.Action {
 	case Ec2Stop, DetachVolume:
 	case Ec2Restart:
 	default:
 		err := fmt.Errorf("awschaos have unknown action type")
 		log.Error(err, "Wrong AWSChaos Action type")
 
-		allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
+		actionField := spec.Child("action")
+		allErrs = append(allErrs, field.Invalid(actionField, in.Action, err.Error()))
 	}
 	return allErrs
-}
-
-func init() {
-	genericwebhook.Register("EbsVolume", reflect.PtrTo(reflect.TypeOf(EbsVolume(""))))
-	genericwebhook.Register("AWSDeviceName", reflect.PtrTo(reflect.TypeOf(AWSDeviceName(""))))
 }

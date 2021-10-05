@@ -13,7 +13,6 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import CheckIcon from '@material-ui/icons/Check'
-import { ExperimentKind } from 'components/NewExperiment/types'
 import Paper from 'components-mui/Paper'
 import PublishIcon from '@material-ui/icons/Publish'
 import Scheduler from './form/Scheduler'
@@ -24,8 +23,11 @@ import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
 import { string as yupString } from 'yup'
 
-function isInstant(kind: ExperimentKind | '', action: string) {
-  if (kind === 'PodChaos' && (action === 'pod-kill' || action === 'container-kill')) {
+function isInstant(target: any) {
+  if (
+    target.kind === 'PodChaos' &&
+    (target.pod_chaos.action === 'pod-kill' || target.pod_chaos.action === 'container-kill')
+  ) {
     return true
   }
 
@@ -38,9 +40,8 @@ interface Step2Props {
 }
 
 const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
-  const { namespaces, step2, kindAction, basic, scheduleSpecific } = useStoreSelector((state) => state.experiments)
-  const [kind, action] = kindAction
-  const scopeDisabled = kind === 'AWSChaos' || kind === 'GCPChaos'
+  const { namespaces, step2, basic, target, scheduleSpecific } = useStoreSelector((state) => state.experiments)
+  const scopeDisabled = target.kind === 'AWSChaos' || target.kind === 'GCPChaos'
   const schema = basicSchema({ scopeDisabled })
   const dispatch = useStoreDispatch()
 
@@ -126,7 +127,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
               <Grid container spacing={6}>
                 <Grid item xs={6}>
                   <Space>
-                    <Typography sx={{ color: scopeDisabled ? 'text.disabled' : undefined }}>
+                    <Typography color={scopeDisabled ? 'textSecondary' : undefined}>
                       {T('newE.steps.scope')}
                       {scopeDisabled && T('newE.steps.scopeDisabled')}
                     </Typography>
@@ -178,7 +179,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                       <LabelField name="labels" label={T('k8s.labels')} isKV />
                       <LabelField name="annotations" label={T('k8s.annotations')} isKV />
                     </AdvancedOptions>
-                    {!inWorkflow && !isInstant(kind, action) && (
+                    {!inWorkflow && !isInstant(target) && (
                       <>
                         <Divider />
                         <Scheduler errors={errors} touched={touched} inSchedule={inSchedule} />

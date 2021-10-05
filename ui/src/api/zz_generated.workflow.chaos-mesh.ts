@@ -9,6 +9,5 @@ export const mapping = new Map<string, string>([
   ['NetworkChaos', 'networkChaos'],
   ['PodChaos', 'podChaos'],
   ['StressChaos', 'stressChaos'],
-  ['TestWickChaos', 'testwickChaos'],
   ['TimeChaos', 'timeChaos'],
 ])

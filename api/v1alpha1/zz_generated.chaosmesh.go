@@ -17,18 +17,9 @@ import (
 	"encoding/json"
 	"reflect"
 	"time"
-	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"k8s.io/apimachinery/pkg/runtime"
-
-	gw "github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
-
-// updating spec of a chaos will have no effect, we'd better reject it
-var ErrCanNotUpdateChaos = fmt.Errorf("Cannot update chaos spec")
 
 const KindAWSChaos = "AWSChaos"
 
@@ -55,7 +46,7 @@ func (in *AWSChaosSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(string(*in.Duration))
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +70,7 @@ func (in *AWSChaos) GetChaos() *ChaosInstance {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
+		instance.Duration = *in.Spec.Duration
 	}
 	if in.DeletionTimestamp != nil {
 		instance.EndTime = in.DeletionTimestamp.Time
@@ -152,43 +143,6 @@ func (in *AWSChaos) IsOneShot() bool {
 	
 }
 
-var AWSChaosWebhookLog = logf.Log.WithName("AWSChaos-resource")
-
-func (in *AWSChaos) ValidateCreate() error {
-	AWSChaosWebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *AWSChaos) ValidateUpdate(old runtime.Object) error {
-	AWSChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*AWSChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *AWSChaos) ValidateDelete() error {
-	AWSChaosWebhookLog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-var _ webhook.Validator = &AWSChaos{}
-
-func (in *AWSChaos) Validate() error {
-	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
-}
-
-var _ webhook.Defaulter = &AWSChaos{}
-
-func (in *AWSChaos) Default() {
-	gw.Default(in)
-}
-
 const KindDNSChaos = "DNSChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -214,7 +168,7 @@ func (in *DNSChaosSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(string(*in.Duration))
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +192,7 @@ func (in *DNSChaos) GetChaos() *ChaosInstance {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
+		instance.Duration = *in.Spec.Duration
 	}
 	if in.DeletionTimestamp != nil {
 		instance.EndTime = in.DeletionTimestamp.Time
@@ -307,43 +261,6 @@ func (in *DNSChaos) IsOneShot() bool {
 	
 }
 
-var DNSChaosWebhookLog = logf.Log.WithName("DNSChaos-resource")
-
-func (in *DNSChaos) ValidateCreate() error {
-	DNSChaosWebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *DNSChaos) ValidateUpdate(old runtime.Object) error {
-	DNSChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*DNSChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *DNSChaos) ValidateDelete() error {
-	DNSChaosWebhookLog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-var _ webhook.Validator = &DNSChaos{}
-
-func (in *DNSChaos) Validate() error {
-	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
-}
-
-var _ webhook.Defaulter = &DNSChaos{}
-
-func (in *DNSChaos) Default() {
-	gw.Default(in)
-}
-
 const KindGCPChaos = "GCPChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -369,7 +286,7 @@ func (in *GCPChaosSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(string(*in.Duration))
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +310,7 @@ func (in *GCPChaos) GetChaos() *ChaosInstance {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
+		instance.Duration = *in.Spec.Duration
 	}
 	if in.DeletionTimestamp != nil {
 		instance.EndTime = in.DeletionTimestamp.Time
@@ -466,43 +383,6 @@ func (in *GCPChaos) IsOneShot() bool {
 	
 }
 
-var GCPChaosWebhookLog = logf.Log.WithName("GCPChaos-resource")
-
-func (in *GCPChaos) ValidateCreate() error {
-	GCPChaosWebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *GCPChaos) ValidateUpdate(old runtime.Object) error {
-	GCPChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*GCPChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *GCPChaos) ValidateDelete() error {
-	GCPChaosWebhookLog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-var _ webhook.Validator = &GCPChaos{}
-
-func (in *GCPChaos) Validate() error {
-	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
-}
-
-var _ webhook.Defaulter = &GCPChaos{}
-
-func (in *GCPChaos) Default() {
-	gw.Default(in)
-}
-
 const KindHTTPChaos = "HTTPChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -528,7 +408,7 @@ func (in *HTTPChaosSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(string(*in.Duration))
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
 		return nil, err
 	}
@@ -552,7 +432,7 @@ func (in *HTTPChaos) GetChaos() *ChaosInstance {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
+		instance.Duration = *in.Spec.Duration
 	}
 	if in.DeletionTimestamp != nil {
 		instance.EndTime = in.DeletionTimestamp.Time
@@ -621,43 +501,6 @@ func (in *HTTPChaos) IsOneShot() bool {
 	
 }
 
-var HTTPChaosWebhookLog = logf.Log.WithName("HTTPChaos-resource")
-
-func (in *HTTPChaos) ValidateCreate() error {
-	HTTPChaosWebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *HTTPChaos) ValidateUpdate(old runtime.Object) error {
-	HTTPChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*HTTPChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *HTTPChaos) ValidateDelete() error {
-	HTTPChaosWebhookLog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-var _ webhook.Validator = &HTTPChaos{}
-
-func (in *HTTPChaos) Validate() error {
-	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
-}
-
-var _ webhook.Defaulter = &HTTPChaos{}
-
-func (in *HTTPChaos) Default() {
-	gw.Default(in)
-}
-
 const KindIOChaos = "IOChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -683,7 +526,7 @@ func (in *IOChaosSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(string(*in.Duration))
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
 		return nil, err
 	}
@@ -707,7 +550,7 @@ func (in *IOChaos) GetChaos() *ChaosInstance {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
+		instance.Duration = *in.Spec.Duration
 	}
 	if in.DeletionTimestamp != nil {
 		instance.EndTime = in.DeletionTimestamp.Time
@@ -776,43 +619,6 @@ func (in *IOChaos) IsOneShot() bool {
 	
 }
 
-var IOChaosWebhookLog = logf.Log.WithName("IOChaos-resource")
-
-func (in *IOChaos) ValidateCreate() error {
-	IOChaosWebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *IOChaos) ValidateUpdate(old runtime.Object) error {
-	IOChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*IOChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *IOChaos) ValidateDelete() error {
-	IOChaosWebhookLog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-var _ webhook.Validator = &IOChaos{}
-
-func (in *IOChaos) Validate() error {
-	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
-}
-
-var _ webhook.Defaulter = &IOChaos{}
-
-func (in *IOChaos) Default() {
-	gw.Default(in)
-}
-
 const KindJVMChaos = "JVMChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -838,7 +644,7 @@ func (in *JVMChaosSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(string(*in.Duration))
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
 		return nil, err
 	}
@@ -862,7 +668,7 @@ func (in *JVMChaos) GetChaos() *ChaosInstance {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
+		instance.Duration = *in.Spec.Duration
 	}
 	if in.DeletionTimestamp != nil {
 		instance.EndTime = in.DeletionTimestamp.Time
@@ -931,43 +737,6 @@ func (in *JVMChaos) IsOneShot() bool {
 	
 }
 
-var JVMChaosWebhookLog = logf.Log.WithName("JVMChaos-resource")
-
-func (in *JVMChaos) ValidateCreate() error {
-	JVMChaosWebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *JVMChaos) ValidateUpdate(old runtime.Object) error {
-	JVMChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*JVMChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *JVMChaos) ValidateDelete() error {
-	JVMChaosWebhookLog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-var _ webhook.Validator = &JVMChaos{}
-
-func (in *JVMChaos) Validate() error {
-	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
-}
-
-var _ webhook.Defaulter = &JVMChaos{}
-
-func (in *JVMChaos) Default() {
-	gw.Default(in)
-}
-
 const KindKernelChaos = "KernelChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -993,7 +762,7 @@ func (in *KernelChaosSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(string(*in.Duration))
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
 		return nil, err
 	}
@@ -1017,7 +786,7 @@ func (in *KernelChaos) GetChaos() *ChaosInstance {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
+		instance.Duration = *in.Spec.Duration
 	}
 	if in.DeletionTimestamp != nil {
 		instance.EndTime = in.DeletionTimestamp.Time
@@ -1086,43 +855,6 @@ func (in *KernelChaos) IsOneShot() bool {
 	
 }
 
-var KernelChaosWebhookLog = logf.Log.WithName("KernelChaos-resource")
-
-func (in *KernelChaos) ValidateCreate() error {
-	KernelChaosWebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *KernelChaos) ValidateUpdate(old runtime.Object) error {
-	KernelChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*KernelChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *KernelChaos) ValidateDelete() error {
-	KernelChaosWebhookLog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-var _ webhook.Validator = &KernelChaos{}
-
-func (in *KernelChaos) Validate() error {
-	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
-}
-
-var _ webhook.Defaulter = &KernelChaos{}
-
-func (in *KernelChaos) Default() {
-	gw.Default(in)
-}
-
 const KindNetworkChaos = "NetworkChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1148,7 +880,7 @@ func (in *NetworkChaosSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(string(*in.Duration))
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
 		return nil, err
 	}
@@ -1172,7 +904,7 @@ func (in *NetworkChaos) GetChaos() *ChaosInstance {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
+		instance.Duration = *in.Spec.Duration
 	}
 	if in.DeletionTimestamp != nil {
 		instance.EndTime = in.DeletionTimestamp.Time
@@ -1241,43 +973,6 @@ func (in *NetworkChaos) IsOneShot() bool {
 	
 }
 
-var NetworkChaosWebhookLog = logf.Log.WithName("NetworkChaos-resource")
-
-func (in *NetworkChaos) ValidateCreate() error {
-	NetworkChaosWebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *NetworkChaos) ValidateUpdate(old runtime.Object) error {
-	NetworkChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*NetworkChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *NetworkChaos) ValidateDelete() error {
-	NetworkChaosWebhookLog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-var _ webhook.Validator = &NetworkChaos{}
-
-func (in *NetworkChaos) Validate() error {
-	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
-}
-
-var _ webhook.Defaulter = &NetworkChaos{}
-
-func (in *NetworkChaos) Default() {
-	gw.Default(in)
-}
-
 const KindPodChaos = "PodChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1303,7 +998,7 @@ func (in *PodChaosSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(string(*in.Duration))
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
 		return nil, err
 	}
@@ -1327,7 +1022,7 @@ func (in *PodChaos) GetChaos() *ChaosInstance {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
+		instance.Duration = *in.Spec.Duration
 	}
 	if in.DeletionTimestamp != nil {
 		instance.EndTime = in.DeletionTimestamp.Time
@@ -1400,43 +1095,6 @@ func (in *PodChaos) IsOneShot() bool {
 	
 }
 
-var PodChaosWebhookLog = logf.Log.WithName("PodChaos-resource")
-
-func (in *PodChaos) ValidateCreate() error {
-	PodChaosWebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *PodChaos) ValidateUpdate(old runtime.Object) error {
-	PodChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*PodChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *PodChaos) ValidateDelete() error {
-	PodChaosWebhookLog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-var _ webhook.Validator = &PodChaos{}
-
-func (in *PodChaos) Validate() error {
-	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
-}
-
-var _ webhook.Defaulter = &PodChaos{}
-
-func (in *PodChaos) Default() {
-	gw.Default(in)
-}
-
 const KindStressChaos = "StressChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1462,7 +1120,7 @@ func (in *StressChaosSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(string(*in.Duration))
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
 		return nil, err
 	}
@@ -1486,7 +1144,7 @@ func (in *StressChaos) GetChaos() *ChaosInstance {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
+		instance.Duration = *in.Spec.Duration
 	}
 	if in.DeletionTimestamp != nil {
 		instance.EndTime = in.DeletionTimestamp.Time
@@ -1555,202 +1213,6 @@ func (in *StressChaos) IsOneShot() bool {
 	
 }
 
-var StressChaosWebhookLog = logf.Log.WithName("StressChaos-resource")
-
-func (in *StressChaos) ValidateCreate() error {
-	StressChaosWebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *StressChaos) ValidateUpdate(old runtime.Object) error {
-	StressChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*StressChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *StressChaos) ValidateDelete() error {
-	StressChaosWebhookLog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-var _ webhook.Validator = &StressChaos{}
-
-func (in *StressChaos) Validate() error {
-	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
-}
-
-var _ webhook.Defaulter = &StressChaos{}
-
-func (in *StressChaos) Default() {
-	gw.Default(in)
-}
-
-const KindTestWickChaos = "TestWickChaos"
-
-// IsDeleted returns whether this resource has been deleted
-func (in *TestWickChaos) IsDeleted() bool {
-	return !in.DeletionTimestamp.IsZero()
-}
-
-// IsPaused returns whether this resource has been paused
-func (in *TestWickChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
-		return false
-	}
-	return true
-}
-
-// GetObjectMeta would return the ObjectMeta for chaos
-func (in *TestWickChaos) GetObjectMeta() *metav1.ObjectMeta {
-	return &in.ObjectMeta
-}
-
-// GetDuration would return the duration for chaos
-func (in *TestWickChaosSpec) GetDuration() (*time.Duration, error) {
-	if in.Duration == nil {
-		return nil, nil
-	}
-	duration, err := time.ParseDuration(string(*in.Duration))
-	if err != nil {
-		return nil, err
-	}
-	return &duration, nil
-}
-
-// GetChaos would return the a record for chaos
-func (in *TestWickChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindTestWickChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
-// GetStatus returns the status
-func (in *TestWickChaos) GetStatus() *ChaosStatus {
-	return &in.Status.ChaosStatus
-}
-
-// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
-func (in *TestWickChaos) GetSpecAndMetaString() (string, error) {
-	spec, err := json.Marshal(in.Spec)
-	if err != nil {
-		return "", err
-	}
-
-	meta := in.ObjectMeta.DeepCopy()
-	meta.SetResourceVersion("")
-	meta.SetGeneration(0)
-
-	return string(spec) + meta.String(), nil
-}
-
-// +kubebuilder:object:root=true
-
-// TestWickChaosList contains a list of TestWickChaos
-type TestWickChaosList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []TestWickChaos `json:"items"`
-}
-
-// ListChaos returns a list of chaos
-func (in *TestWickChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
-	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
-	}
-	return res
-}
-
-func (in *TestWickChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
-	duration, err := in.Spec.GetDuration()
-	if err != nil {
-		return false, 0, err
-	}
-
-	if duration != nil {
-		stopTime := in.GetCreationTimestamp().Add(*duration)
-		if stopTime.Before(now) {
-			return true, 0, nil
-		}
-
-		return false, stopTime.Sub(now), nil
-	}
-
-	return false, 0, nil
-}
-
-func (in *TestWickChaos) IsOneShot() bool {
-	
-	if true {
-		return true
-	}
-
-	return false
-	
-}
-
-var TestWickChaosWebhookLog = logf.Log.WithName("TestWickChaos-resource")
-
-func (in *TestWickChaos) ValidateCreate() error {
-	TestWickChaosWebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *TestWickChaos) ValidateUpdate(old runtime.Object) error {
-	TestWickChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*TestWickChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *TestWickChaos) ValidateDelete() error {
-	TestWickChaosWebhookLog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-var _ webhook.Validator = &TestWickChaos{}
-
-func (in *TestWickChaos) Validate() error {
-	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
-}
-
-var _ webhook.Defaulter = &TestWickChaos{}
-
-func (in *TestWickChaos) Default() {
-	gw.Default(in)
-}
-
 const KindTimeChaos = "TimeChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1776,7 +1238,7 @@ func (in *TimeChaosSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(string(*in.Duration))
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
 		return nil, err
 	}
@@ -1800,7 +1262,7 @@ func (in *TimeChaos) GetChaos() *ChaosInstance {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
+		instance.Duration = *in.Spec.Duration
 	}
 	if in.DeletionTimestamp != nil {
 		instance.EndTime = in.DeletionTimestamp.Time
@@ -1869,43 +1331,6 @@ func (in *TimeChaos) IsOneShot() bool {
 	
 }
 
-var TimeChaosWebhookLog = logf.Log.WithName("TimeChaos-resource")
-
-func (in *TimeChaos) ValidateCreate() error {
-	TimeChaosWebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *TimeChaos) ValidateUpdate(old runtime.Object) error {
-	TimeChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*TimeChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *TimeChaos) ValidateDelete() error {
-	TimeChaosWebhookLog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-var _ webhook.Validator = &TimeChaos{}
-
-func (in *TimeChaos) Validate() error {
-	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
-}
-
-var _ webhook.Defaulter = &TimeChaos{}
-
-func (in *TimeChaos) Default() {
-	gw.Default(in)
-}
-
 func init() {
 
 	SchemeBuilder.Register(&AWSChaos{}, &AWSChaosList{})
@@ -1968,12 +1393,6 @@ func init() {
 		ChaosList: &StressChaosList{},
 	})
 
-	SchemeBuilder.Register(&TestWickChaos{}, &TestWickChaosList{})
-	all.register(KindTestWickChaos, &ChaosKind{
-		Chaos:     &TestWickChaos{},
-		ChaosList: &TestWickChaosList{},
-	})
-
 	SchemeBuilder.Register(&TimeChaos{}, &TimeChaosList{})
 	all.register(KindTimeChaos, &ChaosKind{
 		Chaos:     &TimeChaos{},
@@ -2029,11 +1448,6 @@ func init() {
 	allScheduleItem.register(KindStressChaos, &ChaosKind{
 		Chaos:     &StressChaos{},
 		ChaosList: &StressChaosList{},
-	})
-
-	allScheduleItem.register(KindTestWickChaos, &ChaosKind{
-		Chaos:     &TestWickChaos{},
-		ChaosList: &TestWickChaosList{},
 	})
 
 	allScheduleItem.register(KindTimeChaos, &ChaosKind{

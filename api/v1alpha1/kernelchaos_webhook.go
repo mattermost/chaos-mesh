@@ -16,7 +16,6 @@ package v1alpha1
 import (
 	"fmt"
 	"reflect"
-	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -25,79 +24,65 @@ import (
 )
 
 // log is for logging in this package.
-var timechaoslog = logf.Log.WithName("timechaos-resource")
+var kernelchaoslog = logf.Log.WithName("kernelchaos-resource")
 
-// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-timechaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=timechaos,verbs=create;update,versions=v1alpha1,name=mtimechaos.kb.io
+// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-kernelchaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=kernelchaos,verbs=create;update,versions=v1alpha1,name=mkernelchaos.kb.io
 
-var _ webhook.Defaulter = &TimeChaos{}
+var _ webhook.Defaulter = &KernelChaos{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (in *TimeChaos) Default() {
-	timechaoslog.Info("default", "name", in.Name)
+func (in *KernelChaos) Default() {
+	kernelchaoslog.Info("default", "name", in.Name)
 
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
 	in.Spec.Default()
 }
 
-func (in *TimeChaosSpec) Default() {
-	in.DefaultClockIds()
+func (in *KernelChaosSpec) Default() {
+
 }
 
-// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-timechaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=timechaos,versions=v1alpha1,name=vtimechaos.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-kernelchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=kernelchaos,versions=v1alpha1,name=vkernelchaos.kb.io
 
-var _ webhook.Validator = &TimeChaos{}
+var _ webhook.Validator = &KernelChaos{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (in *TimeChaos) ValidateCreate() error {
-	timechaoslog.Info("validate create", "name", in.Name)
+func (in *KernelChaos) ValidateCreate() error {
+	kernelchaoslog.Info("validate create", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *TimeChaos) ValidateUpdate(old runtime.Object) error {
-	timechaoslog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*TimeChaos).Spec) {
+func (in *KernelChaos) ValidateUpdate(old runtime.Object) error {
+	kernelchaoslog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*KernelChaos).Spec) {
 		return ErrCanNotUpdateChaos
 	}
 	return in.Validate()
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *TimeChaos) ValidateDelete() error {
-	timechaoslog.Info("validate delete", "name", in.Name)
+func (in *KernelChaos) ValidateDelete() error {
+	kernelchaoslog.Info("validate delete", "name", in.Name)
 
 	// Nothing to do?
 	return nil
 }
 
 // Validate validates chaos object
-func (in *TimeChaos) Validate() error {
+func (in *KernelChaos) Validate() error {
 	allErrs := in.Spec.Validate()
-
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
+
 	return nil
 }
 
-func (in *TimeChaosSpec) Validate() field.ErrorList {
+func (in *KernelChaosSpec) Validate() field.ErrorList {
 	specField := field.NewPath("spec")
-	allErrs := in.validateTimeOffset(specField.Child("timeOffset"))
+	allErrs := validatePodSelector(in.PodSelector.Value, in.PodSelector.Mode, specField.Child("value"))
 	allErrs = append(allErrs, validateDuration(in, specField)...)
-
-	return allErrs
-}
-
-// validateTimeOffset validates the timeOffset
-func (in *TimeChaosSpec) validateTimeOffset(timeOffset *field.Path) field.ErrorList {
-	allErrs := field.ErrorList{}
-
-	_, err := time.ParseDuration(in.TimeOffset)
-	if err != nil {
-		allErrs = append(allErrs, field.Invalid(timeOffset,
-			in.TimeOffset,
-			fmt.Sprintf("parse timeOffset field error:%s", err)))
-	}
 
 	return allErrs
 }
