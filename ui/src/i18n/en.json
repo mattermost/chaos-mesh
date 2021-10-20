@@ -93,9 +93,6 @@
       },
       "gcp": {
         "title": "GCP Fault"
-      },
-      "testwick": {
-        "title": "Test Wick"
       }
     },
     "run": {
@@ -202,7 +199,7 @@
     "event": {
       "uuid": "UUID",
       "namespace": "Namespace",
-      "name": "name",
+      "name": "名称",
       "kind": "Kind",
       "started": "Started",
       "message": "Message"

@@ -94,12 +94,7 @@ func NewController(params Params) (types.Controller, error) {
 						for i := 0; i < items.Len(); i++ {
 							item := items.Index(i).Addr().Interface().(InnerObjectWithSelector)
 							for _, record := range item.GetStatus().Experiment.Records {
-								namespacedName, err := controller.ParseNamespacedName(record.Id)
-								if err != nil {
-									setupLog.Error(err, "failed to parse record", "record", record.Id)
-									continue
-								}
-								if namespacedName == objName {
+								if controller.ParseNamespacedName(record.Id) == objName {
 									id := k8sTypes.NamespacedName{
 										Namespace: item.GetObjectMeta().Namespace,
 										Name:      item.GetObjectMeta().Name,

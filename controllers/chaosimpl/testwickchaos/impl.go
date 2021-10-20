@@ -41,6 +41,9 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		"--owner", *testWick.TestWick.Owner,
 		"--provisioner", *testWick.TestWick.ProvisionerURL,
 		"--samples", *testWick.TestWick.Samples,
+		"--provisioner-image-name", *testWick.TestWick.ProvisionerImageName,
+		"--provisioner-image-tag", *testWick.TestWick.ProvisionerImageTag,
+		"--channel-messages-sleep", *testWick.TestWick.ChannelMessagesSleep,
 	}
 	cmd := exec.Command("/usr/local/bin/testwick", arguments...)
 	impl.Log.Info("This is the command running", "command", cmd.String())

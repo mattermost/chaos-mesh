@@ -12705,6 +12705,8 @@ spec:
               type: string
             channelMessages:
               type: string
+            channelMessagesSleep:
+              type: string
             channelSamples:
               type: string
             dbType:
@@ -12714,6 +12716,10 @@ spec:
             hostedZone:
               type: string
             owner:
+              type: string
+            provisionerImageName:
+              type: string
+            provisionerImageTag:
               type: string
             provisionerURL:
               type: string
