@@ -14,40 +14,23 @@
 package controller
 
 import (
-	"errors"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/types"
 )
 
-func ParseNamespacedName(namespacedName string) (types.NamespacedName, error) {
+func ParseNamespacedName(namespacedName string) types.NamespacedName {
 	parts := strings.Split(namespacedName, "/")
-	if len(parts) > 1 {
-		return types.NamespacedName{
-			Namespace: parts[0],
-			Name:      parts[1],
-		}, nil
-	}
-
 	return types.NamespacedName{
-		Namespace: "",
-		Name:      "",
-	}, errors.New("too few parts of namespacedname")
-
+		Namespace: parts[0],
+		Name:      parts[1],
+	}
 }
 
-func ParseNamespacedNameContainer(namespacedName string) (types.NamespacedName, string, error) {
+func ParseNamespacedNameContainer(namespacedName string) (types.NamespacedName, string) {
 	parts := strings.Split(namespacedName, "/")
-	if len(parts) > 2 {
-		return types.NamespacedName{
-			Namespace: parts[0],
-			Name:      parts[1],
-		}, strings.Join(parts[2:], ""), nil
-	}
-
 	return types.NamespacedName{
-		Namespace: "",
-		Name:      "",
-	}, "", errors.New("too few parts of namespacedname")
-
+		Namespace: parts[0],
+		Name:      parts[1],
+	}, strings.Join(parts[2:], "")
 }

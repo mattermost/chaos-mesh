@@ -1,0 +1,24 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: TestWickChaos
+metadata:
+  name: testwick-example2
+  namespace: chaos-mesh
+spec:
+  selector: {}
+  mode: one
+  duration: 30s
+testWick:
+  provisionerURL: "http://provisioner.internal.test.cloud.mattermost.com"
+  hostedZone: "test.mattermost.cloud"
+  samples: "1"
+  channelSamples: "1"
+  channelMessages: "3000"
+  channelMessagesSleep: "1s"
+  owner: "stelios"
+  size: "100users"
+  affinityType: "multitenant"
+  dbType: "aws-multitenant-rds-postgres-pgbouncer"
+  fileStore: "bifrost"
+  provisionerImageName: "mattermost/mm-ee-cloud"
+  provisionerImageTag: "cloud-2021-10-12-1"
+  channelMessagesSleep: "1s"

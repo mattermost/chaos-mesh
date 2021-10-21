@@ -1,7 +1,8 @@
 import { Box, Card, Divider, Typography } from '@material-ui/core'
 import { iconByKind, transByKind } from 'lib/byKind'
-import { setKindAction, setStep1, setTarget as setTargetToStore } from 'slices/experiments'
+import { setKindAction as setKindActionToStore, setStep1, setTarget as setTargetToStore } from 'slices/experiments'
 import targetData, { Kind, Target, schema } from './data/target'
+import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import CheckIcon from '@material-ui/icons/Check'
@@ -55,17 +56,22 @@ const Step1 = () => {
     targetDataEntries = targetDataEntries.filter((d) => d[0] !== 'DNSChaos')
   }
   const {
-    kindAction: [kind, action],
+    kindAction: [_kind, _action],
     step1,
   } = state.experiments
   const dispatch = useStoreDispatch()
 
-  const handleSelectTarget = (key: Kind) => () => {
-    dispatch(setKindAction([key, '']))
-  }
+  const [kindAction, setKindAction] = useState<[Kind | '', string]>([_kind, _action])
+  const [kind, action] = kindAction
+
+  useEffect(() => {
+    setKindAction([_kind, _action])
+  }, [_kind, _action])
+
+  const handleSelectTarget = (key: Kind) => () => setKindAction([key, ''])
 
   const handleSelectAction = (newAction: string) => () => {
-    dispatch(setKindAction([kind, newAction]))
+    dispatch(setKindActionToStore([kind, newAction]))
 
     if (submitDirectly.includes(newAction)) {
       handleSubmitStep1({ action: newAction })
@@ -161,7 +167,6 @@ const Step1 = () => {
             ) : kind === 'TimeChaos' ? (
               <Box mt={6}>
                 <TargetGenerated
-                  kind={kind}
                   data={targetData[kind].spec!}
                   validationSchema={schema.TimeChaos!.default}
                   onSubmit={handleSubmitStep1}
@@ -176,7 +181,9 @@ const Step1 = () => {
         )}
         {action && !submitDirectly.includes(action) && (
           <>
-            <Divider sx={{ my: 6 }} />
+            <Box my={6}>
+              <Divider />
+            </Box>
             <TargetGenerated
               // Force re-rendered after action changed
               key={kind + action}

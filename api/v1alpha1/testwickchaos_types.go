@@ -46,16 +46,19 @@ type TestWickChaosStatus struct {
 }
 
 type TestWick struct {
-	ProvisionerURL  *string `json:"provisionerURL,omitempty"`
-	HostedZone      *string `json:"hostedZone,omitempty"`
-	Samples         *string `json:"samples,omitempty"`
-	ChannelSamples  *string `json:"channelSamples,omitempty"`
-	ChannelMessages *string `json:"channelMessages,omitempty"`
-	Owner           *string `json:"owner,omitempty"`
-	Size            *string `json:"size,omitempty"`
-	AffinityType    *string `json:"affinityType,omitempty"`
-	DBType          *string `json:"dbType,omitempty"`
-	FileStore       *string `json:"fileStore,omitempty"`
+	ProvisionerURL       *string `json:"provisionerURL,omitempty"`
+	HostedZone           *string `json:"hostedZone,omitempty"`
+	Samples              *string `json:"samples,omitempty"`
+	ChannelSamples       *string `json:"channelSamples,omitempty"`
+	ChannelMessages      *string `json:"channelMessages,omitempty"`
+	Owner                *string `json:"owner,omitempty"`
+	Size                 *string `json:"size,omitempty"`
+	AffinityType         *string `json:"affinityType,omitempty"`
+	DBType               *string `json:"dbType,omitempty"`
+	FileStore            *string `json:"fileStore,omitempty"`
+	ProvisionerImageName *string `json:"provisionerImageName,omitempty"`
+	ProvisionerImageTag  *string `json:"provisionerImageTag,omitempty"`
+	ChannelMessagesSleep *string `json:"channelMessagesSleep,omitempty"`
 }
 
 // GetSelectorSpecs is a getter for selectors

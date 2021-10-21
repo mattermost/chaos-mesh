@@ -122,7 +122,6 @@ export type ExperimentKind =
   | 'DNSChaos'
   | 'AWSChaos'
   | 'GCPChaos'
-  | 'TestWickChaos'
 
 export interface ExperimentTarget {
   kind: ExperimentKind
@@ -132,7 +131,6 @@ export interface ExperimentTarget {
   kernel_chaos: ExperimentTargetKernel
   time_chaos: ExperimentTargetTime
   stress_chaos: ExperimentTargetStress
-  testwick_chaos: ExperimentTargetTestWick
 }
 
 export interface ExperimentSchedule {

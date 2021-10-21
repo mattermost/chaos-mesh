@@ -40,11 +40,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	jvmchaos := obj.(*v1alpha1.JVMChaos)
 
 	var pod v1.Pod
-	namespacedName, err := controller.ParseNamespacedName(records[index].Id)
-	if err != nil {
-		return v1alpha1.NotInjected, err
-	}
-	err = impl.Client.Get(ctx, namespacedName, &pod)
+	err := impl.Client.Get(ctx, controller.ParseNamespacedName(records[index].Id), &pod)
 	if err != nil {
 		// TODO: handle this error
 		return v1alpha1.NotInjected, err
@@ -91,12 +87,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	jvmchaos := obj.(*v1alpha1.JVMChaos)
 
 	var pod v1.Pod
-	namespacedName, err := controller.ParseNamespacedName(records[index].Id)
-	if err != nil {
-		// This error is not expected to exist
-		return v1alpha1.NotInjected, err
-	}
-	err = impl.Client.Get(ctx, namespacedName, &pod)
+	err := impl.Client.Get(ctx, controller.ParseNamespacedName(records[index].Id), &pod)
 	if err != nil {
 		if client.IgnoreNotFound(err) != nil {
 			return v1alpha1.Injected, err

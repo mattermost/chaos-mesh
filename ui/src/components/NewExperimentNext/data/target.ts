@@ -27,9 +27,9 @@ export interface Target {
 const networkCommon: Spec = {
   direction: {
     field: 'select',
-    items: ['from', 'to', 'both'],
+    items: ['', 'from', 'to', 'both'],
     label: 'Direction',
-    value: 'to',
+    value: '',
     helperText: 'Specify the network direction',
   },
   external_targets: {
@@ -456,71 +456,6 @@ const data: Record<Kind, Target> = {
       },
     },
   },
-  // Test Wick
-  TestWickChaos: {
-    spec: {
-      provisioner_url: {
-        field: 'text',
-        label: 'Provisioner URL',
-        value: '',
-        helperText: 'Fill the Mattermost Cloud provisioner URL',
-      },
-      hosted_zone: {
-        field: 'text',
-        label: 'Hosted Zone',
-        value: '',
-        helperText: 'Fill the hosted zone used for installations. E.g cloud.mattermost.com',
-      },
-      samples: {
-        field: 'text',
-        label: 'Samples',
-        value: '',
-        helperText: 'Fill the number of samples. E.g 100 for 100 Mattermost installations',
-      },
-      channel_samples: {
-        field: 'text',
-        label: 'Channels Samples',
-        value: '',
-        helperText: 'Fill the number of channel samples. E.g 10 for 10 Mattermost channels',
-      },
-      channel_messages: {
-        field: 'text',
-        label: 'Channels Messages',
-        value: '',
-        helperText: 'Fill the number of channel messages. E.g 1000 for 1000 messages',
-      },
-      owner: {
-        field: 'text',
-        label: 'Owner',
-        value: '',
-        helperText: 'Fill the name of the owner',
-      },
-      size: {
-        field: 'text',
-        label: 'Size',
-        value: '',
-        helperText: 'Fill the installation size. E.g 100users',
-      },
-      affinity_type: {
-        field: 'text',
-        label: 'Affinity Type',
-        value: '',
-        helperText: 'Fill the affinity type. E.g multitenant',
-      },
-      db_type: {
-        field: 'text',
-        label: 'DB Type',
-        value: '',
-        helperText: 'Fill the database type. E.g aws-multitenant-rds-postgres',
-      },
-      file_store: {
-        field: 'text',
-        label: 'File Store',
-        value: '',
-        helperText: 'Fill the file store. E.g bifrost',
-      },
-    },
-  },
   // DNS Fault
   DNSChaos: {
     categories: [
@@ -696,11 +631,6 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   TimeChaos: {
     default: Yup.object({
       time_offset: Yup.string().required('The time offset is required'),
-    }),
-  },
-  TestWickChaos: {
-    default: Yup.object({
-      provisioner_url: Yup.string().required('The Provisioner URL is required'),
     }),
   },
   DNSChaos: {

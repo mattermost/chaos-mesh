@@ -93,9 +93,6 @@
       },
       "gcp": {
         "title": "GCP 故障"
-      },
-      "testwick": {
-        "title": "Test Wick"
       }
     },
     "run": {
